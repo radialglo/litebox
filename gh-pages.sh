@@ -1,7 +1,7 @@
 GH=gh-pages
 M=master
 OUTDIR="."
-ORIGIN="github"
+ORIGIN="origin"
 DATE=$(date)
 
 

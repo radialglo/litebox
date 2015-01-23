@@ -1,4 +1,4 @@
-define(["site/get", "site/litebox"], function(get, litebox) {
+define(["site/get", "site/litebox"], function(get, LiteBox) {
 
     /**
      * @function getImgSrc
@@ -32,36 +32,78 @@ define(["site/get", "site/litebox"], function(get, litebox) {
      */
     var getImgSrc = function(data, size) {
         return "http://farm" +  data.farm + ".staticflickr.com/" + data.server + "/" + data.id + "_" + data.secret + (typeof size === "string" ? "_" + size : "") + ".jpg";
+    }, parseQueryParams = function(str) {
+        // remove ? and split by &
+        var params = {};
+        str = (str.slice(1)).split("&");
+        str.forEach(function(el){
+            el = el.split("=");
+            params[el[0]] = el[1];
+        });
+
+        return params;
     };
+
+    var lb = LiteBox.getInstance(),
+        location = window.location, 
+        queryParams = parseQueryParams(location.search),
+        // "72157626579923453" asia
+        // 72157622079948472 sea
+        setId = (queryParams && queryParams.setId) || "72157629076059695",
+        photoId = (queryParams && queryParams.photoId),
+        grid = document.createElement("div");
+
+        grid.id = "grid";
+        grid.classList.add("clearfix");
  
 
-    get(/*"72157626579923453"*/"72157629076059695", function(data) {
+    get(setId, function(data) {
      
 
-        var photos = data && data.photoset && data.photoset.photo;
+        var photoData = data && data.photoset && data.photoset.photo,
+            lightBoxData = [];
 
        
-        photos.forEach(function(el) {
+        photoData.forEach(function(el, i) {
             var img = document.createElement("img"),
                 frame = document.createElement("div"),
                 caption = document.createElement("div"),
                 anchor = document.createElement("a");
-                anchor.href = "/?photoId=" + el.id;
+                anchor.href = location.pathname + "?photoId=" + el.id  + "&setId=" + setId;
 
                 img.src = getImgSrc(el, "m");
+                lightBoxData.push({url: getImgSrc(el, "z"), title: el.title });
 
                 caption.appendChild(document.createTextNode(el.title));
-                caption.classList.add("lb__thumbnail__caption");
+                caption.classList.add("thumbnail-caption");
 
-                frame.classList.add("lb__thumbnail--frame");
+                frame.classList.add("thumbnail-frame");
 
+                frame.dataset.pos = i;
                 frame.appendChild(anchor);
                 frame.appendChild(img);
                 frame.appendChild(caption);
 
-                document.body.appendChild(frame);
+                grid.appendChild(frame);
         });
+
+        lb.setData(lightBoxData);
+        document.body.appendChild(grid);
     });
+
+    // TODO
+    grid.addEventListener("click", function(e) {
+        
+        var target = e.target;
+        if (target.tagName === "A") {
+            e.preventDefault();
+            history.pushState("","",target.href);
+            console.log(target.parentNode.dataset.pos);
+            lb.open(target.parentNode.dataset.pos);
+        }
+
+
+    }, false);
 
 
 
