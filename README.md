@@ -38,3 +38,6 @@ the source files into [assets/js/litebox-app.js](https://github.com/radialglo/li
 - album feed is rendered below lightbox
 - uses [https://www.flickr.com/services/api/flickr.photosets.getPhotos.html](https://www.flickr.com/services/api/flickr.photosets.getPhotos.html) API
 
+
+Also **learn more about my code samples** via [PROJECTS.md](https://github.com/radialglo/litebox/blob/master/PROJECTS.md)
+
