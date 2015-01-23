@@ -393,3 +393,32 @@ td,
 th {
   padding: 0;
 }
+
+body {
+  font-family: "Lucida Grande","Lucida Sans Unicode","Lucida Sans",Garuda,Verdana,Tahoma,sans-serif;
+}
+
+.lb__thumbnail--frame {
+  float: left;
+  line-height: 0;
+  position: relative;
+}
+.lb__thumbnail--frame > a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.lb__thumbnail__caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  line-height: 1.5em;
+  background: black;
+  color: white;
+  background: rgba(0, 0, 0, 0.3);
+  padding: .5em;
+}

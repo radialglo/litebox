@@ -35,16 +35,31 @@ define(["site/get", "site/litebox"], function(get, litebox) {
     };
  
 
-    get("72157629076059695", function(data) {
+    get(/*"72157626579923453"*/"72157629076059695", function(data) {
      
 
         var photos = data && data.photoset && data.photoset.photo;
 
        
         photos.forEach(function(el) {
-            var img = document.createElement("img");
+            var img = document.createElement("img"),
+                frame = document.createElement("div"),
+                caption = document.createElement("div"),
+                anchor = document.createElement("a");
+                anchor.href = "/?photoId=" + el.id;
+
                 img.src = getImgSrc(el, "m");
-                document.body.appendChild(img);
+
+                caption.appendChild(document.createTextNode(el.title));
+                caption.classList.add("lb__thumbnail__caption");
+
+                frame.classList.add("lb__thumbnail--frame");
+
+                frame.appendChild(anchor);
+                frame.appendChild(img);
+                frame.appendChild(caption);
+
+                document.body.appendChild(frame);
         });
     });
 
