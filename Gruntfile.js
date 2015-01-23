@@ -13,6 +13,7 @@ module.exports = function (grunt) {
         jsDir = assetsDir + "js/";
 
     grunt.initConfig({
+        pkg: grunt.file.readJSON("package.json"),
         sass: {
             build: {
                 options: {
@@ -84,7 +85,8 @@ module.exports = function (grunt) {
             },
             all: {
                 src: [
-                    "Gruntfile.js", jsDir + "src/litebox-app.js",
+                    "Gruntfile.js",
+                    jsDir + "src/litebox-app.js",
                     jsDir + "src/**.js"
                 ]
             }

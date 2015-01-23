@@ -54,6 +54,9 @@ module.exports = function(grunt) {
          baseUrl: "assets/js/src",
          name: "litebox-app",
          out: "litebox-app",
+         paths: {
+            site: './'
+         },
          // We have multiple minify steps
          optimize: "none",
         // Avoid breaking semicolons inserted by r.js
@@ -63,12 +66,12 @@ module.exports = function(grunt) {
         // not globals. The end text can expose some globals from your file,
         // making it easy to create stand-alone libraries that do not mandate
         // the end user use requirejs.
-        /*
+        
          wrap: {
             startFile: "assets/js/src/start.js",
             endFile: "assets/js/src/end.js"
          },
-        */
+        
          // Allow "use strict"; be included in the RequireJS files.
          // Default is false because there are not many browsers that can properly
          // process and give errors on code for ES5 strict mode,
