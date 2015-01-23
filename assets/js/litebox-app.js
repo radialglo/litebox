@@ -55,15 +55,38 @@
     };
 
 
+    /**
+     * @class LiteBox
+     * @desc Singleton class for light box view of photos
+     * This lightbox cycles around instead preventing users from going next
+     * or previous.
+     * 
+     * The following methods are available for the Singleton
+     * setData - sets the data for the light box
+     * open - opens lightbox at specific index
+     * close
+     */
     var LiteBox = (function() {
-        var instance,
+        // constants
+        var KEY_LEFT = 37,
+            KEY_RIGHT = 39,
+
+            instance,
+            _enabled = false,
             _curIdx,
+            _lastIdx,
+
+
             _img,
             _title,
             _data,
 
+            _closeButton,
+
             _nextButton,
             _prevButton,
+            // next/previous buttons are quite small,
+            // so we create larger panels/click regions to go left and right
             _nextPanel,
             _prevPanel,
 
@@ -74,26 +97,54 @@
             _stageContent,
             setData = function(data) {
                 _data = data;
+                _lastIdx = _data.length - 1;
             },
             open = function(idx) {
-               _update(idx);
-               _overlay.style.display = "block";
+                if (idx >= 0 && idx <= _lastIdx && _data && _data.length > 0) {
+                    _enabled = true;
+                    _curIdx = idx;
+                    _overlay.style.display = "block";
+                    _update();
+                }
             },
             close = function(idx) {
                 _overlay.style.display = "none";
+                _enabled = false;
             },
-            _update = function(idx) {
-                _curIdx = idx;
-                if (!_img) {
-                    _img = new Image();
-                    _title = document.createElement("div");
-                    _title.classList.add("thumbnail-caption");
+            _next = function() {
 
-                    _stage.appendChild(_img);
-                    _stage.appendChild(_title);
-                } 
-                _img.src = _data[_curIdx].url;
-                _title.textContent = _data[_curIdx].title;
+                if (_curIdx < _lastIdx) {
+                    _curIdx++;
+                } else {
+                    _curIdx = 0;
+                }
+                _update();
+ 
+            },
+            _prev = function() {
+
+                    if (_curIdx > 0) {
+                        _curIdx--;
+                    } else {
+                        _curIdx = _lastIdx;
+                    }
+                    _update();
+
+            },
+            _update = function() {
+                if (_enabled) {
+                    if (!_img) {
+                        _img = new Image();
+                        _title = document.createElement("div");
+                        _title.classList.add("thumbnail-caption");
+
+                        _stage.appendChild(_img);
+                        _stage.appendChild(_title);
+                    } 
+                    _img.src = _data[_curIdx].url;
+                    _title.textContent = _data[_curIdx].title;
+                    history.pushState("","",_data[_curIdx].route);
+                }
             },
             _init = function() {
                 _overlay = document.createElement("div");
@@ -111,6 +162,9 @@
                 _wrapper.appendChild(_stageCell);
                 _stageCell.appendChild(_stage);
                
+                _closeButton = document.createElement("span");
+                _closeButton.classList.add("lb__close");
+                _closeButton.innerHTML = "&times;";
 
                 _nextPanel = document.createElement("div");
                 _nextPanel.classList.add("next-panel", "panel");
@@ -127,28 +181,36 @@
                 _prevPanel.appendChild(_prevButton);
 
 
-                _prevPanel.addEventListener("click", function(e){
-
-                    _update(--_curIdx);
-                });
-
-                _nextPanel.addEventListener("click", function(e) {
-                    console.log(e);
-                    console.log(_curIdx);
-                    _update(++_curIdx);
-                });
-
-
-
-                 _overlay.appendChild(_wrapper);
-                 _overlay.appendChild(_nextPanel);
-                 _overlay.appendChild(_prevPanel);
+                _overlay.appendChild(_closeButton);
+                _overlay.appendChild(_wrapper);
+                _overlay.appendChild(_nextPanel);
+                _overlay.appendChild(_prevPanel);
 
                 document.body.appendChild(_overlay);
 
+
+                // add event listeners for all buttons
+                _closeButton.addEventListener("click", close, false);
+
+                _prevPanel.addEventListener("click", _prev, false);
+
+                _nextPanel.addEventListener("click", _next, false);
+
+                window.addEventListener("keydown", function(e) {
+                    var keycode = e.keyCode;
+         
+                    if (keycode === KEY_LEFT) {
+                        _prev();
+                    } else if (keycode === KEY_RIGHT) {
+                        _next();
+                    }
+                });
+
+
                 return {
                     setData: setData,
-                    open: open
+                    open: open,
+                    close: close
                 };
             };
 
@@ -164,6 +226,7 @@
     })();
 
 
+   
     /**
      * @function getImgSrc
      * @desc based on photo meta data, generate relevant img url
@@ -196,7 +259,7 @@
      */
     var getImgSrc = function(data, size) {
         return "http://farm" +  data.farm + ".staticflickr.com/" + data.server + "/" + data.id + "_" + data.secret + (typeof size === "string" ? "_" + size : "") + ".jpg";
-    }, parseQueryParams = function(str) {
+    },  parseQueryParams = function(str) {
         // remove ? and split by &
         var params = {};
         str = (str.slice(1)).split("&");
@@ -206,11 +269,10 @@
         });
 
         return params;
-    };
-
-    var lb = LiteBox.getInstance(),
+    },  lb = LiteBox.getInstance(),
         location = window.location, 
         queryParams = parseQueryParams(location.search),
+        startIdx,
         // "72157626579923453" asia
         // 72157622079948472 sea
         setId = (queryParams && queryParams.setId) || "72157629076059695",
@@ -232,11 +294,17 @@
             var img = document.createElement("img"),
                 frame = document.createElement("div"),
                 caption = document.createElement("div"),
-                anchor = document.createElement("a");
-                anchor.href = location.pathname + "?photoId=" + el.id  + "&setId=" + setId;
+                anchor = document.createElement("a"),
+                route = location.pathname + "?photoId=" + el.id  + "&setId=" + setId;
+
+                if (el.id === photoId) {
+                    startIdx = i;
+                }
+
+                anchor.href = route;
 
                 img.src = getImgSrc(el, "m");
-                lightBoxData.push({url: getImgSrc(el, "z"), title: el.title });
+                lightBoxData.push({url: getImgSrc(el, "z"), title: el.title, route: route});
 
                 caption.appendChild(document.createTextNode(el.title));
                 caption.classList.add("thumbnail-caption");
@@ -252,10 +320,13 @@
         });
 
         lb.setData(lightBoxData);
+        if (typeof startIdx !== "undefined") {
+            lb.open(startIdx);
+        }
         document.body.appendChild(grid);
     });
 
-    // TODO
+    // TODO: support more functionality from history state
     grid.addEventListener("click", function(e) {
         
         var target = e.target;

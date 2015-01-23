@@ -16,6 +16,7 @@
     "express": "~4.6.1"
   },
   "scripts": {
-    "test": "grunt mocha"
+    "test": "grunt mocha",
+    "start": "node app.js"
   }
 }

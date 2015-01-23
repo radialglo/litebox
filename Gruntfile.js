@@ -95,7 +95,7 @@ module.exports = function (grunt) {
 
     grunt.loadTasks(jsDir + "build/tasks");
 
-    grunt.registerTask("default",["jshint", "build"]);
+    grunt.registerTask("default",["sass", "jshint", "build"]);
 
 
 };
