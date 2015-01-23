@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: 'js',
     paths: {
-        site: '../../assets/js/src',
+        site: '../../js/src',
         unit: '../unit',
     }
 });

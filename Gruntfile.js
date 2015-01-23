@@ -35,7 +35,7 @@ module.exports = function (grunt) {
             },
             scripts: {
                 files: ["Gruntfile.js", jsDir + "src/*.js", jsDir + "src/**/*.js", "test/unit/*.js"],
-                tasks: ["jshint"]
+                tasks: ["jshint", "build"]
             }
         },
         build: {
@@ -77,12 +77,15 @@ module.exports = function (grunt) {
                     "module": false,
                     "require": false,
                     "define": false,
+                    //browser constants
+                    "console": false,
 
                 }
             },
             all: {
                 src: [
                     "Gruntfile.js", jsDir + "src/litebox-app.js",
+                    jsDir + "src/**.js"
                 ]
             }
         }
@@ -90,7 +93,7 @@ module.exports = function (grunt) {
 
     grunt.loadTasks(jsDir + "build/tasks");
 
-    grunt.registerTask("default","build");
+    grunt.registerTask("default",["jshint", "build"]);
 
 
 };
